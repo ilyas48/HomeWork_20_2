@@ -1,44 +1,51 @@
-from django.shortcuts import render
+from django.views.generic import ListView
 
 from main.models import Category, Product
 
 
-def category(request):
-    category_list = Category.objects.all()
-    context = {
-        'object_list': category_list,
+class CategoryListView(ListView):
+    model = Category
+    extra_context = {
         'title': 'Категории'
     }
 
-    return render(request, "main/category.html", context)
 
-
-def product(request):
-    product_list = Product.objects.all()
-    context = {
-        'product_list': product_list,
+class ProductListView(ListView):
+    model = Product
+    extra_context = {
         'title': 'Товары'
     }
 
-    return render(request, "main/product.html", context)
+
+class ProductCategoryListView(ListView):
+    model = Product
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(category=self.kwargs.get('pk'))
+        return queryset
+
+    def get_context_data(self, *args, **kwargs):
+        context_data = super().get_context_data(*args, **kwargs)
+
+        products_item = Category.objects.get(pk=self.kwargs.get('pk'))
+        context_data['title'] = f'Товары из выбранной категории {products_item.name}'
+
+        return context_data
 
 
-def products_categories(request, pk):
-    products_item = Category.objects.get(pk=pk)
-    context = {
-        'product_list': Product.objects.filter(category=pk),
-        'title': f'Товары из выбранной категории {products_item.name}'
-    }
+class ProductCardListView(ListView):
+    model = Product
 
-    return render(request, "main/products_categories.html", context)
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(pk=self.kwargs.get('pk'))
+        return queryset
 
+    def get_object(self, queryset=None):
+        self.object = super().get_object(queryset)
+        self.object.number_views += 1
+        self.object.save()
+        return self.object
 
-def product_card(request, name):
-    products_item = Product.objects.get(name=name)
-    context = {
-        'product_list': Product.objects.filter(name=name),
-        'title': f'Полное описание товара {products_item.name}'
-    }
-
-    return render(request, "main/product_card.html", context)
 
