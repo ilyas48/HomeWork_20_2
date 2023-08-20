@@ -1,17 +1,32 @@
 {% extends 'main/base.html' %}
+
 {% block content %}
+
+
+<div class="col-12 mb-5">
+    <a class="btn btn-primary" href="{% url 'main:create_products' %}"
+       class="btn btn-success">Добавить продукт</a>
+</div>
+{% load my_tags %}
+
 {% for object in object_list %}
 <div class="col-md-4">
-    <div class="card mb-4 box-shadow">
+    <div class="card h-95 w-90 text-bg-light mb-4 box-shadow" style="max-width: 18rem;">
+        <!--        <img src="/media/{{ object.photo }}" />-->
+        <img src="{{ object.photo|mediapath }}"/>
         <div class="card-body">
-            <p class="card-text">{{ object }}</p>
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="btn-group">
-                    <a href ="{% url 'main:products_categories' object.pk %}" type="button" class="btn btn-dark">К товарам</a>
-                </div>
+            <h5 class="card-title">{{ object.name }}</h5>
+            <h6 class="card-title">Описание</h6>
+            <p class="card-text">{{ object.description|truncatewords:4 }}</p>
+            <div class="btn-group">
+                <a href="{% url 'main:product_card' object.pk %}"
+                   class="btn btn-success">Подробнее</a>
+                <a href="{% url 'main:update_products' object.pk %}"
+                   class="btn btn-success">Редактировать</a>
             </div>
         </div>
     </div>
 </div>
 {% endfor %}
+</div>
 {% endblock %}
